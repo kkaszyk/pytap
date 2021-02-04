@@ -22,13 +22,14 @@ class Parser():
                     if line[0:2] == "JD":
                         self.dimensions = [int(x,16) for x in line.split(' ')[1:]]
                         self.tg_size = self.dimensions[3] * self.dimensions[4] * self.dimensions[5]
+                        self.warp_size = min(self.warp_size, self.tg_size)
                     elif line[0] == "T":
                         if self.thread_counter % self.tg_size == 0 or self.thread_counter == 0:
                             self.tg_counter += 1
                             self.trace.append([])
                         if self.thread_counter % self.warp_size == 0 or self.thread_counter == 0:
                             self.warp_counter += 1
-                            self.trace[-1].append(Warp(self.warp_counter))
+                            self.trace[-1].append(Warp(self.warp_counter, self.warp_size))
                         self.thread_counter += 1
                     elif line[0] == "P":
                         entry = [int(x,16) for x in line.split(' ')[1:]]

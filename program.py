@@ -8,9 +8,10 @@ class Thread():
         self.address = 0x0
         
 class Warp():
-    def __init__(self, warp_id):
-        self.threads = [Thread(),Thread(),Thread(),Thread()]
+    def __init__(self, warp_id, warp_size):
+        self.threads = [Thread()] * warp_size
         self.warp_id = warp_id
+        self.warp_size = warp_size
         
     def barrier(self):
         count = 0
