@@ -1,5 +1,6 @@
 import sys
 from packet import *
+from program import *
 
 class Parser():
     def __init__(self):
@@ -7,9 +8,9 @@ class Parser():
         self.dimensions = []
         self.trace = []
         
-        self.thread_counter = -1
-        self.warp_counter = -1
-        self.tg_counter = -1
+        self.thread_counter = 0
+        self.warp_counter = 0
+        self.tg_counter = 0
         #self.filename = sys.argv[1]
 
     def parse(self, filename):
@@ -20,23 +21,22 @@ class Parser():
                 if line != "":
                     if line[0:2] == "JD":
                         self.dimensions = [int(x,16) for x in line.split(' ')[1:]]
-                        self.tg_size = self.dimensions[0] * self.dimensions[1] * self.dimensions[2]
-                        self.warp_size = self.dimensions[3] * self.dimensions[4] * self.dimensions[5]
+                        self.tg_size = self.dimensions[3] * self.dimensions[4] * self.dimensions[5]
                     elif line[0] == "T":
-                        self.thread_counter += 1
-                        if self.thread_counter % self.tg_size == 0:
+                        if self.thread_counter % self.tg_size == 0 or self.thread_counter == 0:
                             self.tg_counter += 1
-                            self.trace.append([[[]]])
-                        elif self.thread_counter % self.warp_size == 0:
+                            self.trace.append([])
+                        if self.thread_counter % self.warp_size == 0 or self.thread_counter == 0:
                             self.warp_counter += 1
-                            self.trace[-1].append([[]])
+                            self.trace[-1].append(Warp(self.warp_counter))
+                        self.thread_counter += 1
                     elif line[0] == "P":
                         entry = [int(x,16) for x in line.split(' ')[1:]]
                         pc = entry[0]
                         num_instructions = entry[1]
                         num_deps = entry[2]
                         deps = entry[3:3+num_deps]
-                        self.trace[-1][-1][-1].append(InstructionPacket(pc, num_instructions, deps))
+                        self.trace[-1][-1].threads[self.thread_counter % self.warp_size].trace.append(InstructionPacket(pc, num_instructions, deps))
                     elif line[0] == "L":
                         entry = [int(x,16) for x in line.split(' ')[1:]]
                         bytes = entry[0]
@@ -45,7 +45,7 @@ class Parser():
                         num_instructions = entry[3]
                         num_deps = entry[4]
                         deps = entry[5:5+num_deps]
-                        self.trace[-1][-1][-1].append(LoadPacket(pc, num_instructions, deps, bytes, address))
+                        self.trace[-1][-1].threads[self.thread_counter % self.warp_size].trace.append(LoadPacket(pc, num_instructions, deps, bytes, address))
                     elif line[0] == "S":
                         entry = [int(x,16) for x in line.split(' ')[1:]]
                         bytes = entry[0]
@@ -54,16 +54,25 @@ class Parser():
                         num_instructions = entry[3]
                         num_deps = entry[4]
                         deps = entry[5:5+num_deps]
-                        self.trace[-1][-1][-1].append(StorePacket(pc, num_instructions, deps, bytes, address))
+                        self.trace[-1][-1].threads[self.thread_counter % self.warp_size].trace.append(StorePacket(pc, num_instructions, deps, bytes, address))
                     elif line[0] == "B":
                         entry = [int(x,16) for x in line.split(' ')[1:]]
                         pc = entry[0]
                         num_instructions = entry[1]
                         num_deps = entry[2]
                         deps = entry[3:3+num_deps]
-                        self.trace[-1][-1][-1].append(BarrierPacket(pc, num_instructions, deps))
+                        self.trace[-1][-1].threads[self.thread_counter % self.warp_size].trace.append(BarrierPacket(pc, num_instructions, deps))
 
-            return self.trace
+            return self.dimensions, self.trace
 
-p = Parser()
-trace = p.parse(sys.argv[1])
+def test():
+    p = Parser()
+    dimensions, trace = p.parse(sys.argv[1])
+    for tg in trace:
+        for w in tg:
+            for t in w.threads:
+                for e in t.trace:
+                    e.print()
+                    
+if __name__ == "__main__":
+    test()
