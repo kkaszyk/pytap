@@ -9,7 +9,7 @@ class Thread():
         
 class Warp():
     def __init__(self, warp_id, warp_size):
-        self.threads = [Thread()] * warp_size
+        self.threads = []
         self.warp_id = warp_id
         self.warp_size = warp_size
         
@@ -28,3 +28,6 @@ class Warp():
     
     def ready(self):
         return not self.barrier() and not self.is_waiting_for_mem()
+
+    def add_thread(self):
+        self.threads.append(Thread())
