@@ -13,7 +13,6 @@ class Parser():
         self.warp_counter = 1
         self.tg_thread_counter = 0
         self.warp_thread_counter = 0
-        #self.filename = sys.argv[1]
 
     def parse(self, filename):
         with open(filename, "r") as fp:
