@@ -1,4 +1,6 @@
 import sys
+import itertools
+
 from packet import *
 from program import *
 
@@ -14,9 +16,15 @@ class Parser():
         self.tg_thread_counter = 0
         self.warp_thread_counter = 0
 
-    def parse(self, filename):
+        self.thread_start_index = {}
+        self.thread_end_index = {}
+        
+    def index(self, filename):
+        line_count = 0
+        thread_id = 0
+        line = 1
+
         with open(filename, "r") as fp:
-            line = 1
             while line:
                 line = fp.readline()
                 if line != "":
@@ -25,6 +33,23 @@ class Parser():
                         self.tg_size = self.dimensions[3] * self.dimensions[4] * self.dimensions[5]
                         self.warp_size = min(self.warp_size, self.tg_size)
                     elif line[0] == "T":
+                        if thread_id != 0:
+                            self.thread_end_index[thread_id - 1] = line_count - 1
+                            self.thread_start_index[thread_id] = line_count
+                            thread_id += 1
+                        else:
+                            self.thread_start_index[thread_id] = line_count
+                            thread_id += 1
+                line_count += 1
+        self.thread_end_index[thread_id - 1] = line_count
+        
+    def parse(self, filename):
+        self.index(filename)
+        
+        with open(filename, "r") as fp:
+            for i in self.thread_start_index.keys():
+                for line in itertools.islice(fp, self.thread_start_index[i], self.thread_end_index[i]):
+                    if line[0] == "T":
                         if self.tg_thread_counter == self.tg_size:
                             self.trace.append([])
                             self.trace[-1].append(Warp(self.warp_counter-1, self.warp_size))
