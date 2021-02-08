@@ -20,6 +20,14 @@ class Warp():
                 count += 1
         return count == len(self.threads)
 
+    def get_waiting_addresses(self):
+        waiting_addrs = []
+        for t in self.threads:
+            if t.waiting_for_mem:
+                waiting_addrs.append(t.waiting_address)
+
+        return waiting_addrs
+    
     def is_waiting_for_mem(self):
         for t in self.threads:
             if t.waiting_for_mem:
