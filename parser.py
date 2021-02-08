@@ -19,6 +19,7 @@ class Parser():
         self.filename = filename
         self.index()
         self.warp_counter = 0
+        self.instr_counter = 0
         
     def index(self):
         line_count = 0
@@ -75,6 +76,7 @@ class Parser():
                         entry = [int(x,16) for x in line.split(' ')[1:]]
                         pc = entry[0]
                         num_instructions = entry[1]
+                        self.instr_counter += num_instructions * 2
                         num_deps = entry[2]
                         deps = entry[3:3+num_deps]
                         trace[-1][-1].threads[warp_thread_counter - 1].trace.append(InstructionPacket(pc, num_instructions, deps))
@@ -84,6 +86,7 @@ class Parser():
                         address = entry[1]
                         pc = entry[2]
                         num_instructions = entry[3]
+                        self.instr_counter += num_instructions * 2
                         num_deps = entry[4]
                         deps = entry[5:5+num_deps]
                         trace[-1][-1].threads[warp_thread_counter - 1].trace.append(LoadPacket(pc, num_instructions, deps, bytes, address))
@@ -93,6 +96,7 @@ class Parser():
                         address = entry[1]
                         pc = entry[2]
                         num_instructions = entry[3]
+                        self.instr_counter += num_instructions * 2
                         num_deps = entry[4]
                         deps = entry[5:5+num_deps]
                         trace[-1][-1].threads[warp_thread_counter - 1].trace.append(StorePacket(pc, num_instructions, deps, bytes, address))
@@ -100,6 +104,7 @@ class Parser():
                         entry = [int(x,16) for x in line.split(' ')[1:]]
                         pc = entry[0]
                         num_instructions = entry[1]
+                        self.instr_counter += num_instructions * 2
                         num_deps = entry[2]
                         deps = entry[3:3+num_deps]
                         trace[-1][-1].threads[warp_thread_counter - 1].trace.append(BarrierPacket(pc, num_instructions, deps))
