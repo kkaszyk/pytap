@@ -49,6 +49,9 @@ class Parser():
                 line_count += 1
         self.threadgroup_end_index[threadgroup_id - 1] = line_count
 
+    def parse_all(self):
+        return self.parse(self.num_tgs)
+        
     def parse(self, n):
         n = min(n, self.num_tgs - self.threadgroup_id)
         trace = []
