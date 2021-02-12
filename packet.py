@@ -10,7 +10,7 @@ class InstructionPacket():
 class LoadPacket(InstructionPacket):
     def __init__(self, pc, num_instructions, dependent_addrs, bytes, address):
         super().__init__(pc, num_instructions, dependent_addrs)
-        self.bytes = bytes
+        self.bytes = bytes + 1
         self.address = address
 
     def print(self):
@@ -19,7 +19,7 @@ class LoadPacket(InstructionPacket):
 class StorePacket(InstructionPacket):
     def __init__(self, pc, num_instructions, dependent_addrs, bytes, address):
         super().__init__(pc, num_instructions, dependent_addrs)
-        self.bytes = bytes
+        self.bytes = bytes + 1
         self.address = address
 
     def print(self):
